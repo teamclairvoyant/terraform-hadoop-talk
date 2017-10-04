@@ -1,0 +1,12 @@
+#!/bin/bash
+# $Id$
+# userdata.jumphost
+
+yum -y -d1 -e1 install rng-tools epel-release
+service rngd start
+chkconfig rngd on
+
+#if ! rpm -q git; then echo "Installing git. Please wait...";yum -y -d1 -e1 install git;fi
+if ! rpm -q epel-release; then echo "Installing epel-release. Please wait...";yum -y -d1 -e1 install epel-release;fi
+yum -y -d1 -e1 install mpssh mussh tmux screen bind-utils apg git
+

@@ -1,16 +1,16 @@
-This demo will set up and manage the infrastructure for a small, HA Hadoop cluster.
-
-*All AWS configuration is manged from here.*
-
+This demo will set up and manage the AWS infrastructure for a small Hadoop
+cluster as well as install the Cloudera Manager server and agents.
 
 * You must have [terraform](https://www.terraform.io/) and [awscli](https://aws.amazon.com/cli/) installed.
 * You must have awscli credentials (`aws configure`) already set up.
-* Assumes deployment to us-west-2.
+* Assumes that `git` is installed locally.
 
 ```
-AWS_PROFILE=clairvoyant terraform init  # only needed once
+terraform init  # only needed once
 
-AWS_PROFILE=clairvoyant terraform plan
-AWS_PROFILE=clairvoyant terraform apply
+terraform plan
+terraform apply
+
+terraform destroy
 ```
 

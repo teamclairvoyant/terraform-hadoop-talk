@@ -1,0 +1,20 @@
+#!/bin/bash
+# $Id$
+# userdata.master
+
+curl -s https://raw.githubusercontent.com/teamclairvoyant/hadoop-deployment-bash/master/utilities/format_disk.sh >/tmp/format_disk.sh
+chmod 0755 /tmp/format_disk.sh
+
+/tmp/format_disk.sh xvdf 0
+/tmp/format_disk.sh xvdg 1
+/tmp/format_disk.sh xvdh 2
+umount /data/2
+rmdir /data/2
+sed -i -e '/^\/dev\/xvdh1/d' /etc/fstab
+echo "/dev/xvdh1 /var/lib/zookeeper xfs defaults,noatime 1 2" >>/etc/fstab
+mkdir -p /var/lib/zookeeper
+mount /var/lib/zookeeper
+mkdir /var/lib/zookeeper/version-2
+chown 991:987 /var/lib/zookeeper
+chown 991:987 /var/lib/zookeeper/version-2
+

@@ -1,0 +1,55 @@
+#!/bin/bash
+# $Id$
+# userdata.manager
+
+if ! rpm -q parted; then echo "Installing parted. Please wait...";yum -y -d1 -e1 install parted; fi
+if ! rpm -q lvm2; then echo "Installing lvm2. Please wait...";yum -y -d1 -e1 install lvm2; fi
+LABEL=msdos
+DISK=xvdf
+FS=xfs
+if [ -b /dev/${DISK} -a ! -b /dev/${DISK}1 ]; then
+  parted -s /dev/${DISK} mklabel $LABEL mkpart primary 1 100% set 1 lvm on
+  sleep 2
+  pvcreate /dev/${DISK}1
+  sleep 2
+  vgcreate datavg /dev/${DISK}1
+  sleep 2
+  lvcreate -L100G -n data0lv datavg
+  sleep 2
+  mkfs -t $FS /dev/datavg/data0lv
+  sed -i -e '/^\/dev\/datavg\/data0lv/d' /etc/fstab
+  echo "/dev/datavg/data0lv /data/0 xfs defaults,noatime 1 2" >>/etc/fstab
+  mkdir -p /data/0
+  mount /data/0
+  for X in cloudera-host-monitor \
+           cloudera-scm-eventserver \
+           cloudera-scm-headlamp \
+           cloudera-scm-server \
+           cloudera-service-monitor; do
+    echo "*** /var/lib/${X}"
+    if [ -d /var/lib/${X} ]; then
+      mv /var/lib/${X} /data/0/
+    else
+      install -m 0755 -o 995 -g 992 -d /data/0/${X}
+    fi
+    ln -s /data/0/${X} /var/lib/${X}
+  done
+
+  lvcreate -L50G -n scmdb datavg
+  mkfs -t $FS /dev/datavg/scmdb
+  sed -i -e '/^\/dev\/datavg\/scmdb/d' /etc/fstab
+  echo "/dev/datavg/scmdb /var/lib/cloudera-scm-server-db xfs defaults,noatime 1 2" >>/etc/fstab
+  mkdir /var/lib/cloudera-scm-server-db
+  mount /var/lib/cloudera-scm-server-db
+  chmod 0700 /var/lib/cloudera-scm-server-db
+  chown 995:992 /var/lib/cloudera-scm-server-db
+
+  lvcreate -L20G -n scmnav datavg
+  mkfs -t $FS /dev/datavg/scmnav
+  sed -i -e '/^\/dev\/datavg\/scmnav/d' /etc/fstab
+  echo "/dev/datavg/scmnav /var/lib/cloudera-scm-navigator xfs defaults,noatime 1 2" >>/etc/fstab
+  mkdir /var/lib/cloudera-scm-navigator
+  mount /var/lib/cloudera-scm-navigator
+  chown 995:992 /var/lib/cloudera-scm-navigator
+fi
+

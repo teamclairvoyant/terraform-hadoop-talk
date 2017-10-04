@@ -1,0 +1,10 @@
+#!/bin/bash
+# $Id$
+# userdata.worker
+
+curl -s https://raw.githubusercontent.com/teamclairvoyant/hadoop-deployment-bash/master/utilities/format_disk.sh >/tmp/format_disk.sh
+chmod 0755 /tmp/format_disk.sh
+
+/tmp/format_disk.sh xvdf 0
+/tmp/format_disk.sh xvdg 1
+
